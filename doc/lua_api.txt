@@ -3287,13 +3287,17 @@ These functions return the leftover itemstack.
       regardless of whether the file or the replacement list parameter have changed.
       The only way to load the file anew is to restart the server.
 
-* `minetest.place_schematic_on_vmanip(vmanip, pos, schematic, rotation, replacement, force_placement)`:
+* `minetest.place_schematic_on_vmanip(vmanip, pos, schematic, rotation, replacement, force_placement, flags)`:
     * This function is analogous to minetest.place_schematic, but places a schematic onto the
       specified VoxelManip object `vmanip` instead of the whole map.
     * Returns false if any part of the schematic was cut-off due to the VoxelManip not
       containing the full area required, and true if the whole schematic was able to fit.
     * Returns nil if the schematic could not be loaded.
     * After execution, any external copies of the VoxelManip contents are invalidated.
+    * `flags` is a flag field with the available flags:
+        * place_center_x
+        * place_center_y
+        * place_center_z
 
 * `minetest.serialize_schematic(schematic, format, options)`
     * Return the serialized schematic specified by schematic (see: Schematic specifier)
