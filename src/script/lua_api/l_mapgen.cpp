@@ -1565,7 +1565,11 @@ int ModApiMapgen::l_place_schematic(lua_State *L)
 		return 0;
 	}
 
-	schem->placeOnMap(map, p, 0, (Rotation)rot, force_placement);
+	//// Read flags
+	u32 flags = 0;
+	read_flags(L, 6, flagdesc_deco, &flags, NULL);
+
+	schem->placeOnMap(map, p, flags, (Rotation)rot, force_placement);
 
 	lua_pushboolean(L, true);
 	return 1;

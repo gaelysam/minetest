@@ -3274,13 +3274,17 @@ These functions return the leftover itemstack.
             * If slice probability list equals `nil`, no slice probabilities are applied.
     * Saves schematic in the Minetest Schematic format to filename.
 
-* `minetest.place_schematic(pos, schematic, rotation, replacements, force_placement)`
+* `minetest.place_schematic(pos, schematic, rotation, replacements, force_placement, flags)`
     * Place the schematic specified by schematic (see: Schematic specifier) at `pos`.
     * `rotation` can equal `"0"`, `"90"`, `"180"`, `"270"`, or `"random"`.
     * If the `rotation` parameter is omitted, the schematic is not rotated.
     * `replacements` = `{["old_name"] = "convert_to", ...}`
     * `force_placement` is a boolean indicating whether nodes other than `air` and
       `ignore` are replaced by the schematic
+    * `flags` is a flag field with the available flags:
+        * place_center_x
+        * place_center_y
+        * place_center_z
     * Returns nil if the schematic could not be loaded.
     * **Warning**: Once you have loaded a schematic from a file, it will be cached. Future calls
       will always use the cached version and the replacement list defined for it,
@@ -3294,10 +3298,6 @@ These functions return the leftover itemstack.
       containing the full area required, and true if the whole schematic was able to fit.
     * Returns nil if the schematic could not be loaded.
     * After execution, any external copies of the VoxelManip contents are invalidated.
-    * `flags` is a flag field with the available flags:
-        * place_center_x
-        * place_center_y
-        * place_center_z
 
 * `minetest.serialize_schematic(schematic, format, options)`
     * Return the serialized schematic specified by schematic (see: Schematic specifier)
