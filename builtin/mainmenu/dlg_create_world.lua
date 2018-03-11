@@ -74,7 +74,8 @@ local function create_world_formspec(dialogdata)
 		"field[4.5,1.4;6,0.5;te_seed;;".. current_seed .. "]" ..
 
 		"label[2,2;" .. fgettext("Mapgen") .. "]"..
-		"dropdown[4.2,2;6.3;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
+		"dropdown[4.2,2;3.5;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
+		"button[7.7,2.1;2.5,0.5;mapgen_params;" .. fgettext("Options") .. "]" ..
 
 		"label[2,3;" .. fgettext("Game") .. "]"..
 		"textlist[4.2,3;5.8,2.3;games;" .. gamemgr.gamelist() ..
@@ -138,6 +139,14 @@ local function create_world_buttonhandler(this, fields)
 			gamedata.errormessage = fgettext("No game selected")
 		end
 		this:delete()
+		return true
+	end
+
+	if fields["mapgen_params"] then
+		local mapgen_params_dlg = create_mapgen_params_dlg(fields["dd_mapgen"])
+		mapgen_params_dlg:set_parent(this)
+		this:hide()
+		mapgen_params_dlg:show()
 		return true
 	end
 
