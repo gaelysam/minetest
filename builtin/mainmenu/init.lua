@@ -47,6 +47,7 @@ dofile(menupath .. DIR_DELIM .. "dlg_settings_advanced.lua")
 if menustyle ~= "simple" then
 	dofile(menupath .. DIR_DELIM .. "dlg_create_world.lua")
 	dofile(menupath .. DIR_DELIM .. "dlg_mapgen_params.lua")
+	dofile(menupath .. DIR_DELIM .. "dlg_mapgen_preset_edit.lua")
 	dofile(menupath .. DIR_DELIM .. "dlg_delete_mod.lua")
 	dofile(menupath .. DIR_DELIM .. "dlg_delete_world.lua")
 	dofile(menupath .. DIR_DELIM .. "dlg_rename_modpack.lua")

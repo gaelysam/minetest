@@ -18,55 +18,58 @@
 local mgname
 
 local function mapgen_params_formspec(data)
+	local mapgens = core.get_mapgen_names()
 	local preset_list = "Original,Voxelproof,Wider,Custom"
 
+	local mglist = "all,"
+	local selindex = 1
+	local i = 1
+	for k,v in pairs(mapgens) do
+		if mgname == v then
+			selindex = i+1
+		end
+		i = i + 1
+		mglist = mglist .. v .. ","
+	end
+	mglist = mglist:sub(1, -2)
+
 	local retval =
-		"size[11.5,5.5,true]" ..
-		"label[2,0;" .. fgettext("Mapgen name") .. "]"..
-		"label[4.2,0;" .. mgname .. "]" ..
+		"size[11.5,6.5,true]" ..
+		"label[2,0;" .. fgettext("Mapgen") .. "]"..
+		"dropdown[4.2,0;2.5;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
 
-		"label[2,1;" .. fgettext("Parameters preset") .. "]" ..
-		"textlist[4.2,1;5.8,2.3;presets;" .. preset_list .. ";" .. "1" .. ";false]" ..
+		"label[2,1;" .. fgettext("Mapgen presets") .. "]" ..
+		"textlist[2,1.5;5.2,2.6;presets;" .. preset_list .. ";" .. "1" .. ";false]" ..
+		"button[7.5,1.5;2.5,0.5;mg_preset_edit;" .. fgettext("Edit") .. "]" ..
+		"button[7.5,2.5;2.5,0.5;mg_preset_copy_edit;" .. fgettext("Edit a copy") .. "]" ..
+		"button[7.5,3.5;2.5,0.5;mg_preset_remove;" .. fgettext("Remove") .. "]" ..
 
-		"button[4.2,4;5.8,0.5;advanced_params;" .. fgettext("Advanced parameters") .. "]" ..
+		"button[2,4.5;8,0.5;mg_preset_new;" .. fgettext("New preset with current parameters") .. "]" ..
 
-		"button[3.25,5;2.5,0.5;mapgen_params_confirm;" .. fgettext("Save") .. "]" ..
-		"button[5.75,5;2.5,0.5;mapgen_params_cancel;" .. fgettext("Cancel") .. "]"
+		"button[3.25,6;2.5,0.5;mg_presets_confirm;" .. fgettext("Save") .. "]" ..
+		"button[5.75,6;2.5,0.5;mg_presets_cancel;" .. fgettext("Cancel") .. "]"
 		
 	return retval
 
 end
 
-local mapgen_settings_paths = {
-	v5 = {"Mapgen/Mapgen V5", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
-	v6 = {"Mapgen/Mapgen V6", "Mapgen/Mapgen flags"},
-	v7 = {"Mapgen/Mapgen V7", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
-	valleys = {"Mapgen/Mapgen Valleys", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
-	carpathian = {"Mapgen/Mapgen Carpathian", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
-	fractal = {"Mapgen/Mapgen Fractal", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
-	flat = {"Mapgen/Mapgen Flat", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
-	singlenode = {},
-}
-
-local paths
-
 local function mapgen_params_buttonhandler(this, fields)
-	if fields["mapgen_params_confirm"] then
+	if fields["mg_presets_confirm"] then
 		-- To be implemented
 		this:delete()
 		return true
 	end
 
-	if fields["mapgen_params_cancel"] then
+	if fields["mg_presets_cancel"] then
 		this:delete()
 		return true
 	end
 
-	if fields["advanced_params"] then
-		local adv_settings_dlg = create_adv_settings_dlg(mgname, paths)
-		adv_settings_dlg:set_parent(this)
+	if fields["mg_preset_new"] then
+		local mg_preset_dlg = create_mg_preset_edit_dlg(mgname)
+		mg_preset_dlg:set_parent(this)
 		this:hide()
-		adv_settings_dlg:show()
+		mg_preset_dlg:show()
 		return true
 	end
 
@@ -80,7 +83,6 @@ function create_mapgen_params_dlg(arg_mgname)
 					mapgen_params_buttonhandler,
 					nil)
 	mgname = arg_mgname
-	paths = mapgen_settings_paths[arg_mgname]
 	
 	return retval
 end

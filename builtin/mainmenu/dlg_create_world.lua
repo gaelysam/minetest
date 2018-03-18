@@ -68,14 +68,14 @@ local function create_world_formspec(dialogdata)
 	local retval =
 		"size[11.5,6.5,true]" ..
 		"label[2,0;" .. fgettext("World name") .. "]"..
-		"field[4.5,0.4;6,0.5;te_world_name;;" .. minetest.formspec_escape(worldname) .. "]" ..
+		"field[4.5,0.4;6,0.5;te_world_name;;" .. core.formspec_escape(worldname) .. "]" ..
 
-		"label[2,1;" .. fgettext("Seed") .. "]"..
-		"field[4.5,1.4;6,0.5;te_seed;;".. current_seed .. "]" ..
+		"label[2,1;" .. fgettext("Mapgen") .. "]"..
+		"dropdown[4.2,1;2.5;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
+		"field[7,1.4;3.5,0.5;te_seed;" .. fgettext("Seed") .. ";" .. current_seed .. "]" ..
 
-		"label[2,2;" .. fgettext("Mapgen") .. "]"..
-		"dropdown[4.2,2;3.5;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
-		"button[7.7,2.1;2.5,0.5;mapgen_params;" .. fgettext("Options") .. "]" ..
+		"button[4.2,2.1;3,0.5;mapgen_presets;" .. fgettext("Mapgen presets") .. "]" ..
+		"button[7.2,2.1;3,0.5;mapgen_adv_settings;" .. fgettext("Advanced settings") .. "]" ..
 
 		"label[2,3;" .. fgettext("Game") .. "]"..
 		"textlist[4.2,3;5.8,2.3;games;" .. gamemgr.gamelist() ..
@@ -150,7 +150,7 @@ local function create_world_buttonhandler(this, fields)
 		return true
 	end
 
-	if fields["mapgen_params"] then
+	if fields["mapgen_presets"] then
 		local mgname = fields["dd_mapgen"]
 		core.settings:set("mg_name", mgname)
 		core.settings:set("fixed_map_seed", fields["te_seed"])
@@ -159,6 +159,20 @@ local function create_world_buttonhandler(this, fields)
 		mapgen_params_dlg:set_parent(this)
 		this:hide()
 		mapgen_params_dlg:show()
+		return true
+	end
+
+	if fields["mapgen_adv_settings"] then
+		local mgname = fields["dd_mapgen"]
+		core.settings:set("mgname", mgname)
+		core.settings:set("fixed_map_seed", fields["te_seed"])
+
+		local paths = get_mapgen_settings_path(mgname)
+
+		local adv_settings_dlg = create_adv_settings_dlg(mgname, paths)
+		adv_settings_dlg:set_parent(this)
+		this:hide()
+		adv_settings_dlg:show()
 		return true
 	end
 
