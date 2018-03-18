@@ -38,13 +38,13 @@ local function mapgen_params_formspec(data)
 end
 
 local mapgen_settings_paths = {
-	v5 = {"Mapgen/Mapgen V5", "Mapgen/Biome API temperature and humidity noise parameters"},
-	v6 = {"Mapgen/Mapgen V6"},
-	v7 = {"Mapgen/Mapgen V7", "Mapgen/Biome API temperature and humidity noise parameters"},
-	valleys = {"Mapgen/Mapgen Valleys", "Mapgen/Biome API temperature and humidity noise parameters"},
-	carpathian = {"Mapgen/Mapgen Carpathian", "Mapgen/Biome API temperature and humidity noise parameters"},
-	fractal = {"Mapgen/Mapgen Fractal", "Mapgen/Biome API temperature and humidity noise parameters"},
-	flat = {"Mapgen/Mapgen Flat", "Mapgen/Biome API temperature and humidity noise parameters"},
+	v5 = {"Mapgen/Mapgen V5", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
+	v6 = {"Mapgen/Mapgen V6", "Mapgen/Mapgen flags"},
+	v7 = {"Mapgen/Mapgen V7", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
+	valleys = {"Mapgen/Mapgen Valleys", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
+	carpathian = {"Mapgen/Mapgen Carpathian", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
+	fractal = {"Mapgen/Mapgen Fractal", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
+	flat = {"Mapgen/Mapgen Flat", "Mapgen/Biome API temperature and humidity noise parameters", "Mapgen/Mapgen flags"},
 	singlenode = {},
 }
 

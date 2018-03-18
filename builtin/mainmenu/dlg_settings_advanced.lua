@@ -464,6 +464,9 @@ local function get_partial_settings_list(paths)
 
 			elseif level == address.level then
 				table.insert(new_settings, item)
+			elseif level == address.level - 1 and item.readable_name == address[1] then
+				table.insert(new_settings, item)
+				break
 			end
 		end
 	end
