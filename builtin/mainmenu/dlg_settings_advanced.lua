@@ -402,6 +402,75 @@ local function parse_config_file(read_all, parse_mods)
 	return settings
 end
 
+local function get_address(path)
+	local address = {}
+	address.recursive = true
+
+	path = path:trim()
+	if path:sub(-1) == "*" then
+		path = path:sub(1,-2)
+		address.recursive = false
+	end
+
+	for _,v in ipairs(path:split("/")) do
+		local name = v:trim()
+		if #name > 0 then
+			table.insert(address, name)
+		end
+	end
+	address.level = #address
+
+	return address
+end
+
+local full_settings = parse_config_file(false, true)
+
+local function get_partial_settings_list(paths)
+	local new_settings = {}
+
+	local addresses = {}
+	if type(paths) == "string" then
+		table.insert(addresses, get_address(paths))
+	elseif type(paths) == "table" then
+		for _, path in ipairs(paths) do
+			table.insert(addresses, get_address(path))
+		end
+	end
+
+	for _, address in ipairs(addresses) do
+		table.insert(new_settings, {
+			name = address[#address],
+			level = 0,
+			type = "category",
+		})
+
+		local level = 0
+		for _, item in ipairs(full_settings) do
+			if item.type == "category" then
+				if level < address.level then
+					if item.level == level and item.name == address[1] then
+						table.remove(address, 1)
+						level = level + 1
+					end	
+				elseif not address.recursive or item.level < address.level then
+					break
+				else
+					table.insert(new_settings, {
+						name = item.name,
+						level = item.level - address.level + 1,
+						type = "category",
+					})
+				end
+
+			elseif level == address.level then
+				table.insert(new_settings, item)
+			end
+		end
+	end
+
+	return new_settings
+end
+
 local function filter_settings(settings, searchstring)
 	if not searchstring or searchstring == "" then
 		return settings, -1
@@ -475,10 +544,10 @@ local function filter_settings(settings, searchstring)
 	return result, best_setting or -1
 end
 
-local full_settings = parse_config_file(false, true)
-local search_string = ""
-local settings = full_settings
-local selected_setting = 1
+--local search_string
+--local settings
+--local selected_setting
+local dlgdata
 
 local function get_current_value(setting)
 	local value = core.settings:get(setting.name)
@@ -531,7 +600,7 @@ end
 local checkboxes = {} -- handle checkboxes events
 
 local function create_change_setting_formspec(dialogdata)
-	local setting = settings[selected_setting]
+	local setting = dlgdata.settings[dlgdata.selected_setting]
 	local height = 5.2
 	if setting.type == "noise_params_2d" or setting.type == "noise_params_3d" then
 		-- Three flags, checkboxes on 2 columns, with a vertical space of 1/2 unit
@@ -711,7 +780,7 @@ local function create_change_setting_formspec(dialogdata)
 end
 
 local function handle_change_setting_buttons(this, fields)
-	local setting = settings[selected_setting]
+	local setting = dlgdata.settings[dlgdata.selected_setting]
 	if fields["btn_done"] or fields["key_enter"] then
 		if setting.type == "bool" then
 			local new_value = fields["dd_setting_value"]
@@ -858,13 +927,13 @@ local function create_settings_formspec(tabview, name, tabdata)
 	local formspec = "size[12,6.5;true]" ..
 			"tablecolumns[color;tree;text,width=32;text]" ..
 			"tableoptions[background=#00000000;border=false]" ..
-			"field[0.3,0.1;10.2,1;search_string;;" .. core.formspec_escape(search_string) .. "]" ..
+			"field[0.3,0.1;10.2,1;search_string;;" .. core.formspec_escape(dlgdata.search_string) .. "]" ..
 			"field_close_on_enter[search_string;false]" ..
 			"button[10.2,-0.2;2,1;search;" .. fgettext("Search") .. "]" ..
 			"table[0,0.8;12,4.5;list_settings;"
 
 	local current_level = 0
-	for _, entry in ipairs(settings) do
+	for _, entry in ipairs(dlgdata.settings) do
 		local name
 		if not core.settings:get_bool("main_menu_technical_settings") and entry.readable_name then
 			name = fgettext_ne(entry.readable_name)
@@ -899,10 +968,10 @@ local function create_settings_formspec(tabview, name, tabdata)
 		end
 	end
 
-	if #settings > 0 then
+	if #dlgdata.settings > 0 then
 		formspec = formspec:sub(1, -2) -- remove trailing comma
 	end
-	formspec = formspec .. ";" .. selected_setting .. "]" ..
+	formspec = formspec .. ";" .. dlgdata.selected_setting .. "]" ..
 			"button[0,6;4,1;btn_back;".. fgettext("< Back to Settings page") .. "]" ..
 			"button[10,6;2,1;btn_edit;" .. fgettext("Edit") .. "]" ..
 			"button[7,6;3,1;btn_restore;" .. fgettext("Restore Default") .. "]" ..
@@ -915,10 +984,10 @@ end
 local function handle_settings_buttons(this, fields, tabname, tabdata)
 	local list_enter = false
 	if fields["list_settings"] then
-		selected_setting = core.get_table_index("list_settings")
+		dlgdata.selected_setting = core.get_table_index("list_settings")
 		if core.explode_table_event(fields["list_settings"]).type == "DCL" then
 			-- Directly toggle booleans
-			local setting = settings[selected_setting]
+			local setting = dlgdata.settings[dlgdata.selected_setting]
 			if setting and setting.type == "bool" then
 				local current_value = get_current_value(setting)
 				core.settings:set_bool(setting.name, not core.is_yes(current_value))
@@ -933,14 +1002,14 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 	end
 
 	if fields.search or fields.key_enter_field == "search_string" then
-		if search_string == fields.search_string then
-			if selected_setting > 0 then
+		if dlgdata.search_string == fields.search_string then
+			if dlgdata.selected_setting > 0 then
 				-- Go to next result on enter press
-				local i = selected_setting + 1
+				local i = dlgdata.selected_setting + 1
 				local looped = false
-				while i > #settings or settings[i].type == "category" do
+				while i > #dlgdata.settings or dlgdata.settings[i].type == "category" do
 					i = i + 1
-					if i > #settings then
+					if i > #dlgdata.settings then
 						-- Stop infinte looping
 						if looped then
 							return false
@@ -949,21 +1018,21 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 						looped = true
 					end
 				end
-				selected_setting = i
+				dlgdata.selected_setting = i
 				core.update_formspec(this:get_formspec())
 				return true
 			end
 		else
 			-- Search for setting
-			search_string = fields.search_string
-			settings, selected_setting = filter_settings(full_settings, search_string)
+			dlgdata.search_string = fields.search_string
+			dlgdata.settings, dlgdata.selected_setting = filter_settings(dlgdata.dlg_full_settings, dlgdata.search_string)
 			core.update_formspec(this:get_formspec())
 		end
 		return true
 	end
 
 	if fields["btn_edit"] or list_enter then
-		local setting = settings[selected_setting]
+		local setting = dlgdata.settings[dlgdata.selected_setting]
 		if setting and setting.type ~= "category" then
 			local edit_dialog = dialog_create("change_setting", create_change_setting_formspec,
 					handle_change_setting_buttons)
@@ -975,7 +1044,7 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 	end
 
 	if fields["btn_restore"] then
-		local setting = settings[selected_setting]
+		local setting = dlgdata.settings[dlgdata.selected_setting]
 		if setting and setting.type ~= "category" then
 			if setting.type == "noise_params_2d"
 					or setting.type == "noise_params_3d" then
@@ -1004,7 +1073,26 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 	return false
 end
 
-function create_adv_settings_dlg()
+local all_dlgdata = {}
+
+function create_adv_settings_dlg(name, paths)
+
+	if not all_dlgdata[name] then
+		local settings_list = full_settings
+		if paths then
+			settings_list = get_partial_settings_list(paths)
+		end
+
+		all_dlgdata[name] = {
+			settings = settings_list,
+			dlg_full_settings = settings_list,
+			search_string = "",
+			selected_setting = 1,
+		}
+	end
+
+	dlgdata = all_dlgdata[name]
+
 	local dlg = dialog_create("settings_advanced",
 				create_settings_formspec,
 				handle_settings_buttons,
