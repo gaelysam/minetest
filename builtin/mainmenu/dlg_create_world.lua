@@ -142,19 +142,23 @@ local function create_world_buttonhandler(this, fields)
 		return true
 	end
 
-	if fields["mapgen_params"] then
-		local mapgen_params_dlg = create_mapgen_params_dlg(fields["dd_mapgen"])
-		mapgen_params_dlg:set_parent(this)
-		this:hide()
-		mapgen_params_dlg:show()
-		return true
-	end
-
 	worldname = fields.te_world_name
 
 	if fields["games"] then
 		local gameindex = core.get_textlist_index("games")
 		core.settings:set("menu_last_game", gamemgr.games[gameindex].id)
+		return true
+	end
+
+	if fields["mapgen_params"] then
+		local mgname = fields["dd_mapgen"]
+		core.settings:set("mg_name", mgname)
+		core.settings:set("fixed_map_seed", fields["te_seed"])
+
+		local mapgen_params_dlg = create_mapgen_params_dlg(mgname)
+		mapgen_params_dlg:set_parent(this)
+		this:hide()
+		mapgen_params_dlg:show()
 		return true
 	end
 
