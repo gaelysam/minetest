@@ -37,18 +37,18 @@ local function mapgen_params_formspec(data)
 
 end
 
-local mapgen_names = {
-	v5 = "Mapgen V5",
-	v6 = "Mapgen V6",
-	v7 = "Mapgen V7",
-	valleys = "Mapgen Valleys",
-	carpathian = "Mapgen Carpathian",
-	fractal = "Mapgen Fractal",
-	flat = "Mapgen Flat",
-	singlenode = "Mapgen Singlenode",
+local mapgen_settings_paths = {
+	v5 = {"Mapgen/Mapgen V5", "Mapgen/Biome API temperature and humidity noise parameters"},
+	v6 = {"Mapgen/Mapgen V6"},
+	v7 = {"Mapgen/Mapgen V7", "Mapgen/Biome API temperature and humidity noise parameters"},
+	valleys = {"Mapgen/Mapgen Valleys", "Mapgen/Biome API temperature and humidity noise parameters"},
+	carpathian = {"Mapgen/Mapgen Carpathian", "Mapgen/Biome API temperature and humidity noise parameters"},
+	fractal = {"Mapgen/Mapgen Fractal", "Mapgen/Biome API temperature and humidity noise parameters"},
+	flat = {"Mapgen/Mapgen Flat", "Mapgen/Biome API temperature and humidity noise parameters"},
+	singlenode = {},
 }
 
-local mapgen
+local paths
 
 local function mapgen_params_buttonhandler(this, fields)
 	if fields["mapgen_params_confirm"] then
@@ -63,12 +63,6 @@ local function mapgen_params_buttonhandler(this, fields)
 	end
 
 	if fields["advanced_params"] then
-		local paths = {
-			"Mapgen*",
-			"Mapgen/Biome API temperature and humidity noise parameters",
-			"Mapgen/" .. mapgen,
-		}
-
 		local adv_settings_dlg = create_adv_settings_dlg(mgname, paths)
 		adv_settings_dlg:set_parent(this)
 		this:hide()
@@ -86,7 +80,7 @@ function create_mapgen_params_dlg(arg_mgname)
 					mapgen_params_buttonhandler,
 					nil)
 	mgname = arg_mgname
-	mapgen = mapgen_names[arg_mgname]
+	paths = mapgen_settings_paths[arg_mgname]
 	
 	return retval
 end
