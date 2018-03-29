@@ -47,6 +47,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "mapgen_v6.h"
 #include "mapgen_v7.h"
 #include "mapgen_valleys.h"
+#include "mapgen_watershed.h"
 #include "mapgen_singlenode.h"
 #include "cavegen.h"
 #include "dungeongen.h"
@@ -89,6 +90,7 @@ static MapgenDesc g_reg_mapgens[] = {
 	{"valleys",    true},
 	{"singlenode", true},
 	{"carpathian", true},
+	{"watershed",  true},
 };
 
 STATIC_ASSERT(
@@ -168,6 +170,8 @@ Mapgen *Mapgen::createMapgen(MapgenType mgtype, int mgid,
 		return new MapgenV7(mgid, (MapgenV7Params *)params, emerge);
 	case MAPGEN_VALLEYS:
 		return new MapgenValleys(mgid, (MapgenValleysParams *)params, emerge);
+	case MAPGEN_WATERSHED:
+		return new MapgenWatershed(mgid, (MapgenWatershedParams *)params, emerge);
 	default:
 		return NULL;
 	}
@@ -193,6 +197,8 @@ MapgenParams *Mapgen::createMapgenParams(MapgenType mgtype)
 		return new MapgenV7Params;
 	case MAPGEN_VALLEYS:
 		return new MapgenValleysParams;
+	case MAPGEN_WATERSHED:
+		return new MapgenWatershedParams;
 	default:
 		return NULL;
 	}

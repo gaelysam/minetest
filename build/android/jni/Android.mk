@@ -215,6 +215,7 @@ LOCAL_SRC_FILES := \
 		jni/src/mapgen/mapgen_v6.cpp              \
 		jni/src/mapgen/mapgen_v7.cpp              \
 		jni/src/mapgen/mapgen_valleys.cpp         \
+		jni/src/mapgen/mapgen_watershed.cpp       \
 		jni/src/mapgen/mg_biome.cpp               \
 		jni/src/mapgen/mg_decoration.cpp          \
 		jni/src/mapgen/mg_ore.cpp                 \
