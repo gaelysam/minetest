@@ -56,7 +56,8 @@ struct MapgenWatershedParams : public MapgenParams {
 	NoiseParams np_base;
 	NoiseParams np_flat;
 	NoiseParams np_river1;
-	NoiseParams np_river2;
+	NoiseParams np_river2a;
+	NoiseParams np_river2b;
 	NoiseParams np_mountain;
 	NoiseParams np_plateau;
 	NoiseParams np_plat_select;
@@ -111,7 +112,8 @@ private:
 	NoiseParams np_base_div;
 	NoiseParams np_flat_div;
 	NoiseParams np_river1_div;
-	NoiseParams np_river2_div;
+	NoiseParams np_river2a_div;
+	NoiseParams np_river2b_div;
 	NoiseParams np_mountain_div;
 	NoiseParams np_plateau_div;
 	NoiseParams np_plat_select_div;
@@ -123,7 +125,8 @@ private:
 	Noise *noise_base;
 	Noise *noise_flat;
 	Noise *noise_river1;
-	Noise *noise_river2;
+	Noise *noise_river2a;
+	Noise *noise_river2b;
 	Noise *noise_mountain;
 	Noise *noise_plateau;
 	Noise *noise_plat_select;

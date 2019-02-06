@@ -83,7 +83,8 @@ MapgenWatershed::MapgenWatershed(int mapgenid, MapgenWatershedParams *params,
 	np_base_div        = params->np_base;
 	np_flat_div        = params->np_flat;
 	np_river1_div      = params->np_river1;
-	np_river2_div      = params->np_river2;
+	np_river2a_div      = params->np_river2a;
+	np_river2b_div      = params->np_river2b;
 	np_mountain_div    = params->np_mountain;
 	np_plateau_div     = params->np_plateau;
 	np_plat_select_div = params->np_plat_select;
@@ -98,7 +99,8 @@ MapgenWatershed::MapgenWatershed(int mapgenid, MapgenWatershedParams *params,
 		np_base_div.spread        /= v3f(div, div, div);
 		np_flat_div.spread        /= v3f(div, div, div);
 		np_river1_div.spread      /= v3f(div, div, div);
-		np_river2_div.spread      /= v3f(div, div, div);
+		np_river2a_div.spread     /= v3f(div, div, div);
+		np_river2b_div.spread     /= v3f(div, div, div);
 		np_mountain_div.spread    /= v3f(div, div, div);
 		np_plateau_div.spread     /= v3f(div, div, div);
 		np_plat_select_div.spread /= v3f(div, div, div);
@@ -111,7 +113,8 @@ MapgenWatershed::MapgenWatershed(int mapgenid, MapgenWatershedParams *params,
 	noise_base        = new Noise(&np_base_div,        seed, csize.X, csize.Z);
 	noise_flat        = new Noise(&np_flat_div,        seed, csize.X, csize.Z);
 	noise_river1      = new Noise(&np_river1_div,      seed, csize.X, csize.Z);
-	noise_river2      = new Noise(&np_river2_div,      seed, csize.X, csize.Z);
+	noise_river2a      = new Noise(&np_river2a_div,    seed, csize.X, csize.Z);
+	noise_river2b      = new Noise(&np_river2b_div,    seed, csize.X, csize.Z);
 	noise_mountain    = new Noise(&np_mountain_div,    seed, csize.X, csize.Z);
 	noise_plateau     = new Noise(&np_plateau_div,     seed, csize.X, csize.Z);
 	noise_plat_select = new Noise(&np_plat_select_div, seed, csize.X, csize.Z);
@@ -147,7 +150,8 @@ MapgenWatershed::~MapgenWatershed()
 	delete noise_base;
 	delete noise_flat;
 	delete noise_river1;
-	delete noise_river2;
+	delete noise_river2a;
+	delete noise_river2b;
 	delete noise_mountain;
 	delete noise_plateau;
 	delete noise_plat_select;
@@ -184,7 +188,8 @@ MapgenWatershedParams::MapgenWatershedParams()
 	np_base         = NoiseParams(0.0,   1.0,  v3f(2048, 2048, 2048), 106,   3, 0.5,  2.0);
 	np_flat         = NoiseParams(0.0,   0.4,  v3f(2048, 2048, 2048), 909,   3, 0.5,  2.0);
 	np_river1       = NoiseParams(0.0,   1.0,  v3f(1024, 1024, 1024), 2177,  5, 0.5,  2.0);
-	np_river2       = NoiseParams(0.0,   1.0,  v3f(1024, 1024, 1024), 5003,  5, 0.5,  2.0);
+	np_river2a      = NoiseParams(0.0,   1.0,  v3f(512,  512,  512),  5003,  5, 0.5,  2.0);
+	np_river2b      = NoiseParams(0.0,   1.0,  v3f(512,  512,  512),  8839,  5, 0.5,  2.0);
 	np_mountain     = NoiseParams(2.0,   -1.0, v3f(1536, 1536, 1536), 50001, 7, 0.6,  2.0,
 		NOISE_FLAG_EASED | NOISE_FLAG_ABSVALUE);
 	np_plateau      = NoiseParams(0.5,   0.2,  v3f(1024, 1024, 1024), 8111,  4, 0.4,  2.0);
@@ -226,7 +231,8 @@ void MapgenWatershedParams::readParams(const Settings *settings)
 	settings->getNoiseParams("mgwatershed_np_base",        np_base);
 	settings->getNoiseParams("mgwatershed_np_flat",        np_flat);
 	settings->getNoiseParams("mgwatershed_np_river1",      np_river1);
-	settings->getNoiseParams("mgwatershed_np_river2",      np_river2);
+	settings->getNoiseParams("mgwatershed_np_river2a",     np_river2a);
+	settings->getNoiseParams("mgwatershed_np_river2b",     np_river2b);
 	settings->getNoiseParams("mgwatershed_np_mountain",    np_mountain);
 	settings->getNoiseParams("mgwatershed_np_plateau",     np_plateau);
 	settings->getNoiseParams("mgwatershed_np_plat_select", np_plat_select);
@@ -267,7 +273,8 @@ void MapgenWatershedParams::writeParams(Settings *settings) const
 	settings->setNoiseParams("mgwatershed_np_base",        np_base);
 	settings->setNoiseParams("mgwatershed_np_flat",        np_flat);
 	settings->setNoiseParams("mgwatershed_np_river1",      np_river1);
-	settings->setNoiseParams("mgwatershed_np_river2",      np_river2);
+	settings->setNoiseParams("mgwatershed_np_river2a",     np_river2a);
+	settings->setNoiseParams("mgwatershed_np_river2b",     np_river2b);
 	settings->setNoiseParams("mgwatershed_np_mountain",    np_mountain);
 	settings->setNoiseParams("mgwatershed_np_plateau",     np_plateau);
 	settings->setNoiseParams("mgwatershed_np_plat_select", np_plat_select);
@@ -440,7 +447,8 @@ int MapgenWatershed::generateTerrain()
 	noise_base       ->perlinMap2D(node_min.X, node_min.Z);
 	noise_flat       ->perlinMap2D(node_min.X, node_min.Z);
 	noise_river1     ->perlinMap2D(node_min.X, node_min.Z);
-	noise_river2     ->perlinMap2D(node_min.X, node_min.Z);
+	noise_river2a    ->perlinMap2D(node_min.X, node_min.Z);
+	noise_river2b    ->perlinMap2D(node_min.X, node_min.Z);
 	noise_mountain   ->perlinMap2D(node_min.X, node_min.Z);
 	noise_plateau    ->perlinMap2D(node_min.X, node_min.Z);
 	noise_plat_select->perlinMap2D(node_min.X, node_min.Z);
@@ -487,8 +495,8 @@ int MapgenWatershed::generateTerrain()
 		// River valley 1.
 		float n_river1 = noise_river1->result[index2d];
 		float n_river1_abs = std::fabs(n_river1);
-		// River valley 2
-		float n_river2 = noise_river2->result[index2d];
+		// River valley 2: take noise 2A if noise 1 is positive, and noise 2B is noise 1 is negative.
+		float n_river2 = (n_river1 > 0 ? noise_river2a : noise_river2b)->result[index2d];
 		float n_river2_abs = std::fabs(n_river2);
 		// River valley cross sections sink below 0 to define river area and width.
 		// Set river source altitude here.
