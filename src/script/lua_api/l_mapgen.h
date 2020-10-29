@@ -116,6 +116,10 @@ private:
 	// generate_decorations(vm, p1, p2)
 	static int l_generate_decorations(lua_State *L);
 
+	// get_post_mapgen(chunksize)
+	static int l_get_post_mapgen(lua_State *L);
+	//MODIFIED
+
 	// clear_registered_ores
 	static int l_clear_registered_ores(lua_State *L);
 

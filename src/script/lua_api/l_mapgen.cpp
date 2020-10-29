@@ -1544,6 +1544,32 @@ int ModApiMapgen::l_generate_decorations(lua_State *L)
 }
 
 
+// get_post_mapgen(chunksize)
+int ModApiMapgen::l_get_post_mapgen(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+
+	EmergeManager *emerge = getServer(L)->getEmergeManager();
+
+	EmergeParams *p = new EmergeParams(
+			emerge, emerge->biomemgr, emerge->oremgr, emerge->decomgr, emerge->schemmgr);
+
+	MapgenParams *mp = new MapgenParams;
+	// Define mgsettings: where should they come from?
+	mp->readParams(mgsettings);
+
+	LuaPostMapgen *pmg = new LuaPostMapgen(p, mp);
+	if (lua_istable(L, 1))
+		pmg->mg->csize = check_v3s16(L, 1);
+
+	// Convert into a Lua object (idk how)
+
+	//MODIFIED
+	return 0;
+
+}
+
+
 // create_schematic(p1, p2, probability_list, filename, y_slice_prob_list)
 int ModApiMapgen::l_create_schematic(lua_State *L)
 {
