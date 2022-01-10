@@ -113,11 +113,17 @@ EmergeParams::~EmergeParams()
 {
 	infostream << "EmergeParams: destroying " << this << std::endl;
 	// Delete everything that was cloned on creation of EmergeParams
+	std::cout << "A" << std::endl;
 	delete biomegen;
+	std::cout << "B" << std::endl;
 	delete biomemgr;
+	std::cout << "C" << std::endl;
 	delete oremgr;
+	std::cout << "D" << std::endl;
 	delete decomgr;
+	std::cout << "E" << std::endl;
 	delete schemmgr;
+	std::cout << "F" << std::endl;
 }
 
 EmergeParams::EmergeParams(EmergeManager *parent, const BiomeGen *biomegen,

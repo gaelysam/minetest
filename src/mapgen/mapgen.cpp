@@ -52,6 +52,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "cavegen.h"
 #include "dungeongen.h"
 
+#include <iostream>
+
 FlagDesc flagdesc_mapgen[] = {
 	{"caves",       MG_CAVES},
 	{"dungeons",    MG_DUNGEONS},
@@ -132,6 +134,12 @@ Mapgen::Mapgen(int mapgenid, MapgenParams *params, EmergeParams *emerge) :
 	seed = (s32)params->seed;
 
 	ndef      = emerge->ndef;
+
+	//// Initialize biome generator
+	// Unused by non-MapgenBasic mapgens, but may be used from Lua
+	biomegen = emerge->biomegen;
+	biomegen->assertChunkSize(csize);
+	biomemap = biomegen->biomemap;
 }
 
 
@@ -569,6 +577,7 @@ void Mapgen::spreadLight(const v3s16 &nmin, const v3s16 &nmax)
 MapgenBasic::MapgenBasic(int mapgenid, MapgenParams *params, EmergeParams *emerge)
 	: Mapgen(mapgenid, params, emerge)
 {
+	std::cout << "Calling long constructor" << std::endl;
 	this->m_emerge = emerge;
 	this->m_bmgr   = emerge->biomemgr;
 
@@ -594,10 +603,7 @@ MapgenBasic::MapgenBasic(int mapgenid, MapgenParams *params, EmergeParams *emerg
 	//// Allocate heightmap
 	this->heightmap = new s16[csize.X * csize.Z];
 
-	//// Initialize biome generator
-	biomegen = emerge->biomegen;
-	biomegen->assertChunkSize(csize);
-	biomemap = biomegen->biomemap;
+	//// Initializing biome generator is done by parent Mapgen class
 
 	//// Look up some commonly used content
 	c_stone              = ndef->getId("mapgen_stone");
@@ -620,11 +626,20 @@ MapgenBasic::MapgenBasic(int mapgenid, MapgenParams *params, EmergeParams *emerg
 }
 
 
+MapgenBasic::MapgenBasic() : Mapgen() {
+	std::cout << "Calling simple constructor" << std::endl;
+}
+
+
 MapgenBasic::~MapgenBasic()
 {
-	delete []heightmap;
+	std::cout << "Calling MapgenBasic destructor" << std::endl;
+	std::cout << "Mapgen " << getType() << std::endl;
+	if (heightmap)
+		delete []heightmap;
 
-	delete m_emerge; // destroying EmergeParams is our responsibility
+	if (m_emerge)
+		delete m_emerge; // destroying EmergeParams is our responsibility
 }
 
 
@@ -762,6 +777,15 @@ void MapgenBasic::generateBiomes()
  		if (biomemap[index] == BIOME_NONE && water_biome_index != 0)
 			biomemap[index] = water_biome_index;
 	}
+}
+
+
+void MapgenBasic::generateBiomes(v3s16 pmin, v3s16 pmax)
+{
+	node_min = pmin;
+	node_max = pmax;
+
+	generateBiomes();
 }
 
 
