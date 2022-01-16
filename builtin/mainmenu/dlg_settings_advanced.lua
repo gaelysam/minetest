@@ -497,22 +497,24 @@ end
 
 local function get_current_np_group(setting)
 	local value = core.settings:get_np_group(setting.name)
-	local t = {}
 	if value == nil then
-		t = setting.values
+		return setting.values
 	else
-		table.insert(t, value.offset)
-		table.insert(t, value.scale)
-		table.insert(t, value.spread.x)
-		table.insert(t, value.spread.y)
-		table.insert(t, value.spread.z)
-		table.insert(t, value.seed)
-		table.insert(t, value.octaves)
-		table.insert(t, value.persistence)
-		table.insert(t, value.lacunarity)
-		table.insert(t, value.flags)
+		local pfloat = "%.7g"
+		local pint = "%d"
+		return {
+			pfloat:format(value.offset),
+			pfloat:format(value.scale),
+			pfloat:format(value.spread.x),
+			pfloat:format(value.spread.y),
+			pfloat:format(value.spread.z),
+			pint:format(value.seed),
+			pint:format(value.octaves),
+			pfloat:format(value.persistence),
+			pfloat:format(value.lacunarity),
+			value.flags,
+		}
 	end
-	return t
 end
 
 local function get_current_np_group_as_string(setting)
@@ -521,15 +523,15 @@ local function get_current_np_group_as_string(setting)
 	if value == nil then
 		t = setting.default
 	else
-		t = value.offset .. ", " ..
-			value.scale .. ", (" ..
-			value.spread.x .. ", " ..
-			value.spread.y .. ", " ..
-			value.spread.z .. "), " ..
-			value.seed .. ", " ..
-			value.octaves .. ", " ..
-			value.persistence .. ", " ..
+		t = ("%.7g, %.7g, (%.7g, %.7g, %.7g), %d, %d, %.7g, %.7g"):format(
+			value.offset,
+			value.scale,
+			value.spread.x, value.spread.y, value.spread.z,
+			value.seed,
+			value.octaves,
+			value.persistence,
 			value.lacunarity
+		)
 		if value.flags ~= "" then
 			t = t .. ", " .. value.flags
 		end
