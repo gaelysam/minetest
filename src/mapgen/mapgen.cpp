@@ -669,6 +669,7 @@ void MapgenBasic::generateBiomes()
 		bool air_above = c_above == CONTENT_AIR;
 		bool river_water_above = c_above == c_river_water_source;
 		bool water_above = c_above == c_water_source || river_water_above;
+		bool other_nodes = false;
 
 		biomemap[index] = BIOME_NONE;
 
@@ -775,6 +776,7 @@ void MapgenBasic::generateBiomes()
 				nplaced = U16_MAX;  // Disable top/filler placement
 				air_above = false;
 				water_above = false;
+				other_nodes = true;
 			}
 
 			VoxelArea::add_y(em, vi, -1);
@@ -784,6 +786,12 @@ void MapgenBasic::generateBiomes()
 		// surface decorations failing in deep water.
  		if (biomemap[index] == BIOME_NONE && water_biome_index != 0)
 			biomemap[index] = water_biome_index;
+
+		// If no surface at all but other nodes have been encountered,
+		// recalculate biome for the node just below the column. This allows to
+		// place dust nodes (ie. snow) on overgenerated decorations.
+		if (biomemap[index] == BIOME_NONE && other_nodes)
+			biomemap[index] = biomegen->getBiomeAtIndex(index, v3s16(x, node_min.Y-1, z))->index;
 	}
 }
 
